@@ -14,6 +14,7 @@ This kit comes with **made-up sample data** (fictional people, `@example.edu` em
 | `instructions.md` | The instructions you paste into ChatGPT or Claude. They tell it how to build teams and write the email. |
 | `sample-roster.csv` | 10 fictional researchers. Use it as a test and as a template for your own list. |
 | `sample-call.txt` | A fictional funding call to test with. |
+| `dashboard.html` | A dashboard you open in any web browser to review the teams, mark people in or out, keep notes, and copy the email. No account or install. |
 
 # Option 1: ChatGPT (Custom GPT)
 
@@ -56,6 +57,26 @@ Then steer it in plain language:
 - "Rewrite the email for Option A without Theo."
 
 **It never sends anything.** Copy the email, check it, and send it yourself.
+
+# The dashboard
+
+The chat gives you the teams as text. To work with them like the Hub's own Team Finder, use `dashboard.html`:
+
+1. **Double-click `dashboard.html`.** It opens in your web browser with a made-up example already loaded, so you can click around first.
+2. **Load roster (CSV or JSON)**: pick the same roster file you uploaded to ChatGPT or Claude. The example goes away.
+3. In the chat, after it builds the teams, type **"Give me the dashboard JSON."** Copy the block it returns.
+4. Paste it into **Add results** and click **Add to dashboard**.
+
+On the dashboard you can:
+
+- switch between **Options A, B, C**
+- mark each person **✓ In**, **? Maybe**, or **✗ Out**. People marked Out drop off the email's To line.
+- add a note on each person, plus **Team notes**
+- **add anyone** from your roster by name
+- see the **network**: dots colored by department, bigger dots for a stronger digital twin connection, lines for co-authored papers, and the current team outlined. Click a dot for the person's profile.
+- **Copy email** or **Open in my mail app**
+
+Your work is saved in that browser on that computer only. Nothing is sent anywhere. To move it to another computer or hand it to a colleague, click **Save everything to a file** and have them use **Open a saved file**. Keep the dashboard file and the saved file together with your roster. They contain the same people.
 
 # Putting in your own people
 

@@ -1,0 +1,48 @@
+{
+  "call": {"title": "Resilient Infrastructure Digital Twins", "deadline": "March 15, 2027", "link": ""},
+  "summary": "The call wants interdisciplinary teams that build and test digital twins of bridges, buildings, or water systems, joining live sensing, physics or AI models, and decision support that operators will trust and use.",
+  "options": [
+    {
+      "name": "Bridge twin with trusted AI",
+      "angle": "A sensing and modeling core on a real bridge testbed, with a human factors lead showing that operators trust the forecasts.",
+      "lead": "ava-lindqvist",
+      "team": [
+        {"id": "ava-lindqvist", "role": "Lead, structural sensing", "why": "Runs bridge and historic building monitoring with model updating, the physical core of the twin.", "evidence": "Bayesian model updating of a masonry arch bridge from strain data (2025)"},
+        {"id": "marcus-okafor", "role": "AI models", "why": "Builds physics-informed surrogates that make real-time prediction possible, and already publishes with Ava.", "evidence": "Physics-informed surrogates for real-time structural response (2025)"},
+        {"id": "eli-brandt", "role": "Uncertainty", "why": "Brings the uncertainty quantification plan the call asks for.", "evidence": "Sequential UQ for digital twin calibration (2024)"},
+        {"id": "theo-nakamura", "role": "Trust and end users", "why": "Studies how emergency managers read uncertainty in AI forecasts, which answers the call's trust requirement.", "evidence": "How emergency managers read uncertainty in AI forecasts (2025)"}
+      ],
+      "gaps": ["A city or state DOT partner", "Industry sensing vendor"],
+      "email": {"subject": "A team idea for Resilient Infrastructure Digital Twins", "body": "Hi all,\n\nWe're writing because a new call lines up closely with your work and we think you'd make a strong team.\n\nAva leads bridge monitoring with model updating and could anchor the testbed.\nMarcus builds physics-informed surrogates for real-time structural response.\nEli brings uncertainty quantification for twin calibration.\nTheo studies how emergency managers read and trust AI forecasts.\n\nThe Resilient Infrastructure Digital Twins call is due March 15, 2027.\n\nLet us know if we can help support you! We are happy to help you find more teammates, read a one-pager, and plan the proposal.\n\nBest,\nThe Digital Twin Hub"}
+    },
+    {
+      "name": "Campus buildings as testbed",
+      "angle": "Use campus buildings as a ready testbed, pairing an operational energy twin with fault detection and reduced-order models.",
+      "lead": "priya-raman",
+      "team": [
+        {"id": "priya-raman", "role": "Lead, campus twin", "why": "Already runs an operational twin of campus HVAC, which gives the project a working testbed from day one.", "evidence": "A campus-scale operational twin for HVAC fault detection (2025)"},
+        {"id": "eli-brandt", "role": "Reduced-order models", "why": "Makes the building models fast enough for real-time use and has published with Priya.", "evidence": "Reduced-order twins of a district heating network (2025)"},
+        {"id": "marcus-okafor", "role": "Anomaly detection", "why": "Adds unsupervised anomaly detection on sensor streams.", "evidence": "Unsupervised anomaly detection in sensor streams (2024)"}
+      ],
+      "gaps": ["Facility managers as end-user partners", "Human factors or trust evaluation"],
+      "email": {"subject": "A team idea for Resilient Infrastructure Digital Twins", "body": "Hi all,\n\nWe're writing because a new call fits the campus twin work some of you already share.\n\nPriya runs an operational twin of campus HVAC that could serve as the testbed.\nEli builds reduced-order models that make twins run in real time.\nMarcus brings anomaly detection for sensor streams.\n\nThe Resilient Infrastructure Digital Twins call is due March 15, 2027.\n\nLet us know if we can help support you! We are happy to help you find more teammates, read a one-pager, and plan the proposal.\n\nBest,\nThe Digital Twin Hub"}
+    },
+    {
+      "name": "Community hazards and water",
+      "angle": "A broader team focused on flooding and water systems, with community mapping and decision support for county emergency managers.",
+      "lead": "rosa-delgado",
+      "team": [
+        {"id": "rosa-delgado", "role": "Lead, hazards and GIS", "why": "Builds spatial data pipelines for county emergency managers, the end users the call names.", "evidence": "Spatial data pipelines for county emergency managers (2024)"},
+        {"id": "samuel-achebe", "role": "Water and sensing", "why": "Forecasts soil moisture from in-field sensors, a base for a flood-side water twin.", "evidence": "Soil moisture forecasting from in-field sensors (2023)"},
+        {"id": "theo-nakamura", "role": "Decision support", "why": "Studies how emergency managers use AI forecasts, and has published with Rosa.", "evidence": "How emergency managers read uncertainty in AI forecasts (2025)"},
+        {"id": "marcus-okafor", "role": "AI models", "why": "Adds time series machine learning for forecasting.", "evidence": "Unsupervised anomaly detection in sensor streams (2024)"}
+      ],
+      "gaps": ["Hydrology or stormwater modeling", "A water utility partner"],
+      "email": {"subject": "A team idea for Resilient Infrastructure Digital Twins", "body": "Hi all,\n\nWe're writing because a new call could support a twin for flooding and water systems built with county partners.\n\nRosa builds spatial data tools for county emergency managers.\nSamuel forecasts soil moisture from in-field sensors.\nTheo studies how emergency managers use AI forecasts.\nMarcus adds time series machine learning.\n\nThe Resilient Infrastructure Digital Twins call is due March 15, 2027.\n\nLet us know if we can help support you! We are happy to help you find more teammates, read a one-pager, and plan the proposal.\n\nBest,\nThe Digital Twin Hub"}
+    }
+  ],
+  "also": [
+    {"id": "jonah-weiss", "why": "Closed-loop twin experience from manufacturing could transfer."},
+    {"id": "nadia-farouk", "why": "Wearable monitoring methods, if the team adds occupant health."}
+  ]
+}

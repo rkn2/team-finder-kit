@@ -1,0 +1,403 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team Finder Dashboard</title>
+<style>
+:root{
+  --bg:#f6f5f2;--panel:#ffffff;--ink:#1d1d1b;--muted:#6b6a66;--line:#e2e0da;--accent:#1e407c;--accent-ink:#ffffff;
+  --in:#2e7d4f;--maybe:#b7791f;--out:#b23b3b;--soft:#eef1f7;--edge:#c9c7c0;--warn:#8a5a00;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#151513;--panel:#1f1f1d;--ink:#ecebe7;--muted:#a3a29c;--line:#34332f;--accent:#8fb0ea;--accent-ink:#10131a;
+  --in:#6cc58f;--maybe:#e3b35a;--out:#ec7d7d;--soft:#262a33;--edge:#4a4944;--warn:#e3b35a;}}
+:root[data-theme="dark"]{
+  --bg:#151513;--panel:#1f1f1d;--ink:#ecebe7;--muted:#a3a29c;--line:#34332f;--accent:#8fb0ea;--accent-ink:#10131a;
+  --in:#6cc58f;--maybe:#e3b35a;--out:#ec7d7d;--soft:#262a33;--edge:#4a4944;--warn:#e3b35a;}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+h1{font-size:18px;margin:0}
+h2{font-size:15px;margin:0 0 8px}
+.sub{color:var(--muted);font-size:13px}
+button,.btn{font:inherit;font-size:13px;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:8px;padding:6px 10px;cursor:pointer}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:default}
+.tools{display:flex;flex-wrap:wrap;gap:6px}
+main{display:grid;grid-template-columns:260px minmax(0,1fr) minmax(0,420px);gap:16px;padding:16px;max-width:1500px;margin:0 auto}
+@media (max-width:1100px){main{grid-template-columns:240px minmax(0,1fr)}#graphCol{grid-column:1/-1}}
+@media (max-width:720px){main{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:16px}
+textarea,input[type=text]{width:100%;font:inherit;font-size:13px;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px}
+textarea{resize:vertical}
+ul.calls{list-style:none;margin:0;padding:0}
+ul.calls li{padding:8px 10px;border-radius:8px;cursor:pointer;border:1px solid transparent}
+ul.calls li[aria-current=true]{background:var(--soft);border-color:var(--line)}
+ul.calls .t{display:block;font-weight:600;font-size:14px}
+ul.calls .m{font-size:12px;color:var(--muted)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.tabs button[aria-selected=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.person{border-top:1px solid var(--line);padding:10px 0;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px}
+.person:first-child{border-top:0}
+.person .name{font-weight:600;cursor:pointer}
+.person .role{font-size:12px;color:var(--accent);font-weight:600;margin-left:6px}
+.person .why{grid-column:1/-1;font-size:14px}
+.person .ev{grid-column:1/-1;font-size:13px;color:var(--muted);font-style:italic}
+.person .note{grid-column:1/-1}
+.person.out .name,.person.out .why{opacity:.45;text-decoration:line-through}
+.marks{display:flex;gap:4px}
+.marks button{padding:3px 8px}
+.marks button.on[data-m=in]{background:var(--in);border-color:var(--in);color:#fff}
+.marks button.on[data-m=maybe]{background:var(--maybe);border-color:var(--maybe);color:#fff}
+.marks button.on[data-m=out]{background:var(--out);border-color:var(--out);color:#fff}
+.chip{display:inline-block;font-size:12px;padding:2px 8px;border-radius:99px;background:var(--soft);margin:2px 4px 2px 0}
+.warn{color:var(--warn);font-size:13px}
+pre.email{white-space:pre-wrap;font:13px/1.5 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px;margin:8px 0}
+.row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+#graph{width:100%;height:420px;display:block;background:var(--bg);border-radius:8px;border:1px solid var(--line);touch-action:none}
+#graph .edge{stroke:var(--edge);stroke-width:1}
+#graph circle{cursor:pointer;stroke:var(--panel);stroke-width:1.5}
+#graph circle.team{stroke:var(--ink);stroke-width:3}
+#graph circle.dim{opacity:.25}
+#graph text{font-size:10px;fill:var(--ink);pointer-events:none}
+.legend{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
+.profile dt{font-size:12px;color:var(--muted);margin-top:6px}
+.profile dd{margin:0;font-size:14px}
+.empty{color:var(--muted);font-size:14px}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);max-width:640px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.35)}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Team Finder Dashboard</h1>
+    <div class="sub" id="rosterInfo"></div>
+  </div>
+  <div class="tools">
+    <label class="btn">Load roster (CSV or JSON)<input type="file" id="rosterFile" accept=".csv,.json" hidden></label>
+    <button id="exportBtn">Save everything to a file</button>
+    <label class="btn">Open a saved file<input type="file" id="importFile" accept=".json" hidden></label>
+    <button id="helpBtn">How this works</button>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="card">
+      <h2>Add results</h2>
+      <p class="sub" style="margin-top:0">In ChatGPT or Claude, after it builds the teams, ask: <b>"Give me the dashboard JSON."</b> Copy the block it returns and paste it here.</p>
+      <textarea id="pasteBox" rows="6" placeholder='{"call": {"title": ...}, "options": [...]}'></textarea>
+      <div class="row" style="margin-top:8px"><button class="primary" id="addBtn">Add to dashboard</button><span id="pasteMsg" class="warn"></span></div>
+    </div>
+    <div class="card">
+      <h2>Funding calls</h2>
+      <ul class="calls" id="calls"></ul>
+    </div>
+  </section>
+
+  <section id="teamCol">
+    <div class="card" id="teamPanel"></div>
+  </section>
+
+  <section id="graphCol">
+    <div class="card">
+      <h2>Network</h2>
+      <svg id="graph" role="img" aria-label="Network of researchers. Lines are co-authored papers."></svg>
+      <div class="legend" id="legend"></div>
+      <div class="sub" style="margin-top:6px">Bigger dots have a stronger digital twin connection. Lines are co-authored papers. Outlined dots are on the current team. Drag to rearrange, click for a profile.</div>
+    </div>
+    <div class="card profile" id="profile"><div class="empty">Click a person on the team or a dot on the graph to see their profile.</div></div>
+  </section>
+</main>
+
+<dialog id="help">
+  <h2>How this works</h2>
+  <ol>
+    <li><b>Load your roster</b> (the same CSV you uploaded to ChatGPT or Claude). The made-up sample roster loads until you do.</li>
+    <li>In ChatGPT or Claude, paste a funding call. When it has built the teams, ask <b>"Give me the dashboard JSON."</b></li>
+    <li>Paste that block under <b>Add results</b>.</li>
+    <li>Pick an option (A, B, C), mark each person <b>✓ In</b>, <b>? Maybe</b> or <b>✗ Out</b>, add notes, and add anyone else from the roster.</li>
+    <li>Copy the email. People marked Out drop off the To line. The email text was written for the original team, so edit it if you changed the team.</li>
+  </ol>
+  <p class="sub">Everything stays in this browser on this computer. Nothing is sent anywhere. To move your work to another computer or share it, use <b>Save everything to a file</b>, then <b>Open a saved file</b> on the other end.</p>
+  <form method="dialog"><button class="primary">Got it</button></form>
+</dialog>
+
+<script>
+const SAMPLE_CSV = "id,name,email,department,title,dt_connection,research,keywords,recent_papers,coauthors\nava-lindqvist,Ava Lindqvist,ava.lindqvist@example.edu,Civil Engineering,Associate Professor,Strong,\"Structural health monitoring of bridges and historic buildings using sensor networks, laser scanning, and finite element model updating\",structural health monitoring; laser scanning; model updating; bridges,\"Bayesian model updating of a masonry arch bridge from strain data (2025); Point cloud to finite element workflows for historic structures (2024)\",marcus-okafor; priya-raman\nmarcus-okafor,Marcus Okafor,marcus.okafor@example.edu,Computer Science,Assistant Professor,Moderate,\"Machine learning for time series, anomaly detection, and physics-informed neural networks for engineering systems\",machine learning; anomaly detection; physics-informed neural networks,\"Physics-informed surrogates for real-time structural response (2025); Unsupervised anomaly detection in sensor streams (2024)\",ava-lindqvist\npriya-raman,Priya Raman,priya.raman@example.edu,Architectural Engineering,Associate Professor,Strong,\"Building energy modeling, occupant behavior, and operational digital twins for campus buildings\",building energy; occupant behavior; HVAC control; campus digital twin,\"A campus-scale operational twin for HVAC fault detection (2025); Occupancy sensing for energy model calibration (2023)\",ava-lindqvist; jonah-weiss\njonah-weiss,Jonah Weiss,jonah.weiss@example.edu,Industrial Engineering,Professor,Strong,\"Manufacturing digital twins, process monitoring, and decision support for additive manufacturing\",manufacturing; additive manufacturing; process control; decision support,\"Closed-loop digital twin for laser powder bed fusion (2025); Uncertainty-aware scheduling with shop floor twins (2024)\",priya-raman; lena-hoffmann\nlena-hoffmann,Lena Hoffmann,lena.hoffmann@example.edu,Materials Science and Engineering,Assistant Professor,Light,\"Microstructure characterization and process\u2013property models for metal alloys\",microstructure; alloys; process-property models; characterization,\"Linking melt pool history to grain structure in printed steel (2025)\",jonah-weiss\nsamuel-achebe,Samuel Achebe,samuel.achebe@example.edu,Agricultural and Biological Engineering,Associate Professor,Moderate,\"Precision agriculture, crop sensing with drones, and soil moisture modeling\",precision agriculture; drones; soil moisture; remote sensing,\"Drone multispectral imaging for orchard stress mapping (2024); Soil moisture forecasting from in-field sensors (2023)\",rosa-delgado\nrosa-delgado,Rosa Delgado,rosa.delgado@example.edu,Geography,Professor,Moderate,\"GIS, spatial data infrastructure, and community-engaged mapping for hazards and climate adaptation\",GIS; hazards; climate adaptation; community engagement,\"Community flood maps as boundary objects (2025); Spatial data pipelines for county emergency managers (2024)\",samuel-achebe; theo-nakamura\ntheo-nakamura,Theo Nakamura,theo.nakamura@example.edu,Information Sciences and Technology,Assistant Professor,Light,\"Human\u2013computer interaction, visualization, and trust in AI decision support tools\",HCI; visualization; trust in AI; user studies,\"How emergency managers read uncertainty in AI forecasts (2025)\",rosa-delgado\nnadia-farouk,Nadia Farouk,nadia.farouk@example.edu,Nursing,Associate Professor,Light,\"Remote patient monitoring, wearable sensors, and hospital workflow\",wearables; remote monitoring; hospital operations,\"Wearable data for early warning in post-surgical patients (2024)\",\neli-brandt,Eli Brandt,eli.brandt@example.edu,Mechanical Engineering,Professor,Strong,\"Reduced-order modeling, uncertainty quantification, and real-time simulation for energy systems\",reduced-order models; uncertainty quantification; energy systems; real-time simulation,\"Reduced-order twins of a district heating network (2025); Sequential UQ for digital twin calibration (2024)\",marcus-okafor; priya-raman\n";
+const SAMPLE_RESULT = {"call": {"title": "Resilient Infrastructure Digital Twins", "deadline": "March 15, 2027", "link": ""}, "summary": "The call wants interdisciplinary teams that build and test digital twins of bridges, buildings, or water systems, joining live sensing, physics or AI models, and decision support that operators will trust and use.", "options": [{"name": "Bridge twin with trusted AI", "angle": "A sensing and modeling core on a real bridge testbed, with a human factors lead showing that operators trust the forecasts.", "lead": "ava-lindqvist", "team": [{"id": "ava-lindqvist", "role": "Lead, structural sensing", "why": "Runs bridge and historic building monitoring with model updating, the physical core of the twin.", "evidence": "Bayesian model updating of a masonry arch bridge from strain data (2025)"}, {"id": "marcus-okafor", "role": "AI models", "why": "Builds physics-informed surrogates that make real-time prediction possible, and already publishes with Ava.", "evidence": "Physics-informed surrogates for real-time structural response (2025)"}, {"id": "eli-brandt", "role": "Uncertainty", "why": "Brings the uncertainty quantification plan the call asks for.", "evidence": "Sequential UQ for digital twin calibration (2024)"}, {"id": "theo-nakamura", "role": "Trust and end users", "why": "Studies how emergency managers read uncertainty in AI forecasts, which answers the call's trust requirement.", "evidence": "How emergency managers read uncertainty in AI forecasts (2025)"}], "gaps": ["A city or state DOT partner", "Industry sensing vendor"], "email": {"subject": "A team idea for Resilient Infrastructure Digital Twins", "body": "Hi all,\n\nWe're writing because a new call lines up closely with your work and we think you'd make a strong team.\n\nAva leads bridge monitoring with model updating and could anchor the testbed.\nMarcus builds physics-informed surrogates for real-time structural response.\nEli brings uncertainty quantification for twin calibration.\nTheo studies how emergency managers read and trust AI forecasts.\n\nThe Resilient Infrastructure Digital Twins call is due March 15, 2027.\n\nLet us know if we can help support you! We are happy to help you find more teammates, read a one-pager, and plan the proposal.\n\nBest,\nThe Digital Twin Hub"}}, {"name": "Campus buildings as testbed", "angle": "Use campus buildings as a ready testbed, pairing an operational energy twin with fault detection and reduced-order models.", "lead": "priya-raman", "team": [{"id": "priya-raman", "role": "Lead, campus twin", "why": "Already runs an operational twin of campus HVAC, which gives the project a working testbed from day one.", "evidence": "A campus-scale operational twin for HVAC fault detection (2025)"}, {"id": "eli-brandt", "role": "Reduced-order models", "why": "Makes the building models fast enough for real-time use and has published with Priya.", "evidence": "Reduced-order twins of a district heating network (2025)"}, {"id": "marcus-okafor", "role": "Anomaly detection", "why": "Adds unsupervised anomaly detection on sensor streams.", "evidence": "Unsupervised anomaly detection in sensor streams (2024)"}], "gaps": ["Facility managers as end-user partners", "Human factors or trust evaluation"], "email": {"subject": "A team idea for Resilient Infrastructure Digital Twins", "body": "Hi all,\n\nWe're writing because a new call fits the campus twin work some of you already share.\n\nPriya runs an operational twin of campus HVAC that could serve as the testbed.\nEli builds reduced-order models that make twins run in real time.\nMarcus brings anomaly detection for sensor streams.\n\nThe Resilient Infrastructure Digital Twins call is due March 15, 2027.\n\nLet us know if we can help support you! We are happy to help you find more teammates, read a one-pager, and plan the proposal.\n\nBest,\nThe Digital Twin Hub"}}, {"name": "Community hazards and water", "angle": "A broader team focused on flooding and water systems, with community mapping and decision support for county emergency managers.", "lead": "rosa-delgado", "team": [{"id": "rosa-delgado", "role": "Lead, hazards and GIS", "why": "Builds spatial data pipelines for county emergency managers, the end users the call names.", "evidence": "Spatial data pipelines for county emergency managers (2024)"}, {"id": "samuel-achebe", "role": "Water and sensing", "why": "Forecasts soil moisture from in-field sensors, a base for a flood-side water twin.", "evidence": "Soil moisture forecasting from in-field sensors (2023)"}, {"id": "theo-nakamura", "role": "Decision support", "why": "Studies how emergency managers use AI forecasts, and has published with Rosa.", "evidence": "How emergency managers read uncertainty in AI forecasts (2025)"}, {"id": "marcus-okafor", "role": "AI models", "why": "Adds time series machine learning for forecasting.", "evidence": "Unsupervised anomaly detection in sensor streams (2024)"}], "gaps": ["Hydrology or stormwater modeling", "A water utility partner"], "email": {"subject": "A team idea for Resilient Infrastructure Digital Twins", "body": "Hi all,\n\nWe're writing because a new call could support a twin for flooding and water systems built with county partners.\n\nRosa builds spatial data tools for county emergency managers.\nSamuel forecasts soil moisture from in-field sensors.\nTheo studies how emergency managers use AI forecasts.\nMarcus adds time series machine learning.\n\nThe Resilient Infrastructure Digital Twins call is due March 15, 2027.\n\nLet us know if we can help support you! We are happy to help you find more teammates, read a one-pager, and plan the proposal.\n\nBest,\nThe Digital Twin Hub"}}], "also": [{"id": "jonah-weiss", "why": "Closed-loop twin experience from manufacturing could transfer."}, {"id": "nadia-farouk", "why": "Wearable monitoring methods, if the team adds occupant health."}]};
+const KEY = "team-finder-dashboard-v1";
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const PALETTE = ["#4e79a7", "#f28e2b", "#59a14f", "#e15759", "#76b7b2", "#edc948", "#b07aa1", "#ff9da7", "#9c755f", "#86bcb6"];
+const OTHER = "#9a9890";
+
+/* ---------- storage ---------- */
+let state = load() || { roster: null, rosterName: "", calls: [], current: null };
+function load() { try { return JSON.parse(localStorage.getItem(KEY)); } catch { return null; } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch { } }
+
+/* ---------- roster ---------- */
+function parseCSV(t) {
+  const rows = []; let row = [], f = "", q = false;
+  for (let i = 0; i < t.length; i++) {
+    const c = t[i];
+    if (q) { if (c === '"') { if (t[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+    else if (c === '"') q = true;
+    else if (c === ",") { row.push(f); f = ""; }
+    else if (c === "\n" || c === "\r") { if (c === "\r" && t[i + 1] === "\n") i++; row.push(f); rows.push(row); row = []; f = ""; }
+    else f += c;
+  }
+  if (f || row.length) { row.push(f); rows.push(row); }
+  const head = (rows.shift() || []).map(h => h.trim().toLowerCase());
+  return rows.filter(r => r.some(x => x.trim())).map(r => Object.fromEntries(head.map((h, i) => [h, (r[i] || "").trim()])));
+}
+const list = v => Array.isArray(v) ? v.map(String) : String(v || "").split(";").map(s => s.trim()).filter(Boolean);
+const slug = s => String(s).toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+function normalize(rows) {
+  return rows.map(r => ({
+    id: r.id || slug(r.name),
+    name: r.name || r.id,
+    email: r.email || "",
+    department: r.department || r.unit || "",
+    title: r.title || r.level || "",
+    dt: (r.dt_connection || r.dt_strength || "").replace(/^\w/, c => c.toUpperCase()),
+    research: r.research || "",
+    keywords: list(r.keywords),
+    papers: list(r.recent_papers),
+    coauthors: list(r.coauthors),
+  })).filter(p => p.id);
+}
+function setRoster(text, name) {
+  let rows;
+  const t = text.trim();
+  if (t.startsWith("[") || t.startsWith("{")) { const j = JSON.parse(t); rows = Array.isArray(j) ? j : (j.people || []); }
+  else rows = parseCSV(text);
+  const people = normalize(rows);
+  if (!people.length) throw new Error("No people found. Check that the first row has column headings like id, name, research.");
+  state.roster = people; state.rosterName = name; save();
+}
+const people = () => state.roster || [];
+const byId = () => Object.fromEntries(people().map(p => [p.id, p]));
+
+/* ---------- results ---------- */
+function parseResult(text) {
+  let t = text.trim().replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
+  const a = t.indexOf("{"), b = t.lastIndexOf("}");
+  if (a < 0 || b < a) throw new Error("That doesn't look like the dashboard JSON. Ask the chat for \"the dashboard JSON\" and copy the whole block.");
+  const r = JSON.parse(t.slice(a, b + 1));
+  if (!Array.isArray(r.options) || !r.options.length) throw new Error("The JSON has no team options in it.");
+  const call = r.call || {};
+  return {
+    id: "c" + Date.now(),
+    title: String(call.title || r.title || "Untitled call"),
+    deadline: String(call.deadline || ""), link: String(call.link || ""),
+    summary: String(r.summary || ""),
+    options: r.options.slice(0, 3).map(o => ({
+      name: String(o.name || ""), angle: String(o.angle || ""), lead: String(o.lead || ""),
+      team: (o.team || []).map(m => ({ id: String(m.id || slug(m.name || "")), role: String(m.role || ""), why: String(m.why || ""), evidence: String(m.evidence || "") })),
+      gaps: (o.gaps || []).map(String),
+      email: o.email ? { subject: String(o.email.subject || ""), body: String(o.email.body || "") } : null,
+      marks: {}, notes: {}, teamNotes: "",
+    })),
+    also: (r.also || []).map(m => ({ id: String(m.id || ""), why: String(m.why || "") })),
+    picked: 0, added: new Date().toISOString(),
+  };
+}
+const curCall = () => state.calls.find(c => c.id === state.current);
+const curOpt = () => { const c = curCall(); return c ? c.options[c.picked || 0] : null; };
+
+/* ---------- render: calls ---------- */
+function renderCalls() {
+  const el = $("calls");
+  if (!state.calls.length) { el.innerHTML = `<li class="empty" style="cursor:default">No calls yet. Paste results above.</li>`; return; }
+  el.innerHTML = state.calls.map(c => `<li tabindex="0" data-id="${esc(c.id)}" aria-current="${c.id === state.current}">
+    <span class="t">${esc(c.title)}</span><span class="m">${esc(c.deadline || "no deadline listed")}${c.sample ? " · made-up example" : ""}</span></li>`).join("");
+  el.querySelectorAll("li[data-id]").forEach(li => {
+    const go = () => { state.current = li.dataset.id; save(); renderAll(); };
+    li.onclick = go; li.onkeydown = e => { if (e.key === "Enter") go(); };
+  });
+}
+
+/* ---------- render: team ---------- */
+function renderTeam() {
+  const el = $("teamPanel"), c = curCall();
+  if (!c) { el.innerHTML = `<div class="empty">Pick a call on the left, or paste new results, to see the suggested teams here.</div>`; return; }
+  const o = curOpt(), P = byId();
+  const missing = o.team.filter(m => !P[m.id]).map(m => m.id);
+  const mark = id => o.marks[id] || "";
+  const toLine = o.team.filter(m => mark(m.id) !== "out").map(m => P[m.id]?.email).filter(Boolean);
+  const subject = o.email?.subject || "";
+  const body = o.email?.body || "";
+  el.innerHTML = `
+    <div class="row" style="justify-content:space-between"><h2 style="margin:0">${esc(c.title)}</h2><button id="delCall" title="Remove this call">Remove</button></div>
+    <div class="sub">${esc(c.deadline || "")}${c.link ? ` · <a href="${esc(c.link)}" target="_blank" rel="noopener">call page</a>` : ""}${c.sample ? " · made-up example" : ""}</div>
+    ${c.summary ? `<p>${esc(c.summary)}</p>` : ""}
+    <div class="tabs" role="tablist">${c.options.map((x, i) => `<button role="tab" data-i="${i}" aria-selected="${i === (c.picked || 0)}">Option ${"ABC"[i]}${x.name ? ": " + esc(x.name) : ""}</button>`).join("")}</div>
+    ${o.angle ? `<p style="margin-top:0"><b>Strategy.</b> ${esc(o.angle)}</p>` : ""}
+    ${missing.length ? `<p class="warn">Not found in your roster: ${missing.map(esc).join(", ")}. Load the roster you gave the chat, or the ids won't match.</p>` : ""}
+    <div id="members">${o.team.map(m => {
+      const p = P[m.id] || { name: m.id }; const k = mark(m.id);
+      return `<div class="person ${k}" data-id="${esc(m.id)}">
+        <div><span class="name">${esc(p.name)}</span>${o.lead === m.id && !/^lead/i.test(m.role) ? `<span class="role">Lead</span>` : ""}${m.role ? `<span class="role">${esc(m.role)}</span>` : ""}
+          <div class="sub">${esc([p.title, p.department].filter(Boolean).join(", "))}</div></div>
+        <div class="marks">${[["in", "✓ In"], ["maybe", "? Maybe"], ["out", "✗ Out"]].map(([v, l]) => `<button data-m="${v}" class="${k === v ? "on" : ""}" aria-pressed="${k === v}">${l}</button>`).join("")}</div>
+        ${m.why ? `<div class="why">${esc(m.why)}</div>` : ""}
+        ${m.evidence ? `<div class="ev">${esc(m.evidence)}</div>` : ""}
+        <div class="note"><input type="text" placeholder="Note on this person" value="${esc(o.notes[m.id] || "")}"></div>
+      </div>`; }).join("")}</div>
+    <div class="row" style="margin-top:8px">
+      <input type="text" id="addPerson" list="peopleList" placeholder="Add anyone from the roster by name" style="flex:1;min-width:180px">
+      <datalist id="peopleList">${people().filter(p => !o.team.some(m => m.id === p.id)).map(p => `<option value="${esc(p.name)}">`).join("")}</datalist>
+      <button id="addPersonBtn">Add</button>
+    </div>
+    ${o.gaps.length ? `<h2 style="margin-top:16px">Expertise nobody on this team covers</h2><div>${o.gaps.map(g => `<span class="chip">${esc(g)}</span>`).join("")}</div>` : ""}
+    ${c.also.length ? `<h2 style="margin-top:16px">Also worth a look</h2>${c.also.map(a => `<div style="margin-bottom:4px"><span class="name" style="font-weight:600;cursor:pointer" data-profile="${esc(a.id)}">${esc(P[a.id]?.name || a.id)}</span> <span class="sub">${esc(a.why)}</span></div>`).join("")}` : ""}
+    <h2 style="margin-top:16px">Team notes</h2>
+    <textarea id="teamNotes" rows="3" placeholder="Anything to remember about this team">${esc(o.teamNotes)}</textarea>
+    <h2 style="margin-top:16px">Intro email</h2>
+    ${body ? `<pre class="email" id="emailText">To: ${esc(toLine.join("; ") || "(no emails in roster)")}
+Subject: ${esc(subject)}
+
+${esc(body)}</pre>
+    <div class="row"><button class="primary" id="copyEmail">Copy email</button><a class="btn" href="mailto:${encodeURIComponent(toLine.join(","))}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}">Open in my mail app</a><span class="sub" id="copyMsg"></span></div>
+    <p class="sub">Written for the original picks. Edit it if you changed the team. Nothing is ever sent from this page.</p>` : `<p class="empty">No email in these results.</p>`}`;
+
+  el.querySelectorAll(".tabs button").forEach(b => b.onclick = () => { c.picked = +b.dataset.i; save(); renderAll(); });
+  el.querySelectorAll(".person").forEach(row => {
+    const id = row.dataset.id;
+    row.querySelector(".name").onclick = () => showProfile(id);
+    row.querySelectorAll(".marks button").forEach(b => b.onclick = () => { o.marks[id] = o.marks[id] === b.dataset.m ? "" : b.dataset.m; save(); renderTeam(); drawGraph(); });
+    row.querySelector(".note input").oninput = e => { o.notes[id] = e.target.value; save(); };
+  });
+  el.querySelectorAll("[data-profile]").forEach(s => s.onclick = () => showProfile(s.dataset.profile));
+  $("teamNotes").oninput = e => { o.teamNotes = e.target.value; save(); };
+  $("addPersonBtn").onclick = () => {
+    const v = $("addPerson").value.trim().toLowerCase(); if (!v) return;
+    const p = people().find(p => p.name.toLowerCase() === v || p.id === v);
+    if (!p) { $("addPerson").value = ""; $("addPerson").placeholder = "No one by that name in the roster"; return; }
+    if (!o.team.some(m => m.id === p.id)) o.team.push({ id: p.id, role: "Added", why: "", evidence: "" });
+    o.marks[p.id] = "in"; save(); renderTeam(); drawGraph();
+  };
+  $("delCall").onclick = () => {
+    if (!confirm(`Remove "${c.title}" and its marks and notes from this dashboard?`)) return;
+    state.calls = state.calls.filter(x => x !== c); state.current = state.calls[0]?.id || null; save(); renderAll();
+  };
+  const cp = $("copyEmail");
+  if (cp) cp.onclick = async () => {
+    const text = $("emailText").textContent;
+    try { await navigator.clipboard.writeText(text); $("copyMsg").textContent = "Copied."; }
+    catch { const r = document.createRange(); r.selectNodeContents($("emailText")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); $("copyMsg").textContent = "Selected. Press Ctrl+C or ⌘C."; }
+  };
+}
+
+/* ---------- profile ---------- */
+function showProfile(id) {
+  const p = byId()[id], el = $("profile");
+  if (!p) { el.innerHTML = `<div class="warn">${esc(id)} isn't in the loaded roster.</div>`; return; }
+  const P = byId();
+  el.innerHTML = `<h2>${esc(p.name)}</h2><div class="sub">${esc([p.title, p.department].filter(Boolean).join(", "))}</div>
+    <dl>
+      ${p.dt ? `<dt>Digital twin connection</dt><dd>${esc(p.dt)}</dd>` : ""}
+      ${p.email ? `<dt>Email</dt><dd><a href="mailto:${esc(p.email)}">${esc(p.email)}</a></dd>` : ""}
+      <dt>Research</dt><dd>${esc(p.research || "(not on file)")}</dd>
+      ${p.keywords.length ? `<dt>Keywords</dt><dd>${p.keywords.map(k => `<span class="chip">${esc(k)}</span>`).join("")}</dd>` : ""}
+      ${p.papers.length ? `<dt>Recent papers</dt><dd><ul style="margin:0;padding-left:18px">${p.papers.map(x => `<li>${esc(x)}</li>`).join("")}</ul></dd>` : ""}
+      ${p.coauthors.length ? `<dt>Has published with</dt><dd>${p.coauthors.map(x => esc(P[x]?.name || x)).join(", ")}</dd>` : ""}
+    </dl>`;
+}
+
+/* ---------- graph ---------- */
+let sim = null;
+function deptColors() {
+  const counts = {}; people().forEach(p => counts[p.department || "Other"] = (counts[p.department || "Other"] || 0) + 1);
+  const top = Object.entries(counts).sort((a, b) => b[1] - a[1]).map(x => x[0]).filter(d => d !== "Other").slice(0, PALETTE.length);
+  return d => { const i = top.indexOf(d); return i < 0 ? OTHER : PALETTE[i]; };
+}
+function buildSim() {
+  const svg = $("graph"), W = svg.clientWidth || 400, H = svg.clientHeight || 420;
+  const P = people(), idx = Object.fromEntries(P.map((p, i) => [p.id, i]));
+  const depts = [...new Set(P.map(p => p.department || "Other"))];
+  const centers = Object.fromEntries(depts.map((d, i) => { const a = 2 * Math.PI * i / depts.length; return [d, [W / 2 + Math.cos(a) * W * 0.28, H / 2 + Math.sin(a) * H * 0.28]]; }));
+  const nodes = P.map(p => { const [cx, cy] = centers[p.department || "Other"]; return { p, x: cx + (Math.random() - .5) * 40, y: cy + (Math.random() - .5) * 40, vx: 0, vy: 0, r: { Strong: 9, Moderate: 7, Light: 5.5 }[p.dt] || 5, c: centers[p.department || "Other"] }; });
+  const seen = new Set(), edges = [];
+  P.forEach(p => p.coauthors.forEach(q => { if (idx[q] === undefined) return; const k = [p.id, q].sort().join("|"); if (!seen.has(k)) { seen.add(k); edges.push([idx[p.id], idx[q]]); } }));
+  sim = { nodes, edges, W, H, k: Math.min(120, 6000 / Math.max(P.length, 1)) };
+  for (let t = 0; t < 300; t++) step(1 - t / 300);
+}
+function step(alpha) {
+  const { nodes, edges, W, H } = sim;
+  for (let i = 0; i < nodes.length; i++) for (let j = i + 1; j < nodes.length; j++) {
+    const a = nodes[i], b = nodes[j]; let dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy || .01;
+    const min = a.r + b.r + 6, f = sim.k / d2 * alpha;
+    a.vx -= dx * f; a.vy -= dy * f; b.vx += dx * f; b.vy += dy * f;
+    if (d2 < min * min) { const d = Math.sqrt(d2), push = (min - d) / d / 2; a.x -= dx * push; a.y -= dy * push; b.x += dx * push; b.y += dy * push; }
+  }
+  edges.forEach(([i, j]) => { const a = nodes[i], b = nodes[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, f = (d - 50) / d * 0.04 * alpha; a.vx += dx * f; a.vy += dy * f; b.vx -= dx * f; b.vy -= dy * f; });
+  nodes.forEach(n => { if (n.fixed) { n.vx = n.vy = 0; return; } n.vx += (n.c[0] - n.x) * 0.04 * alpha; n.vy += (n.c[1] - n.y) * 0.04 * alpha; n.vx *= .6; n.vy *= .6; n.x = Math.max(n.r + 2, Math.min(W - n.r - 2, n.x + n.vx)); n.y = Math.max(n.r + 2, Math.min(H - n.r - 2, n.y + n.vy)); });
+}
+function drawGraph() {
+  const svg = $("graph");
+  if (!people().length) { svg.innerHTML = ""; return; }
+  if (!sim || sim.nodes.length !== people().length || sim.nodes.some((n, i) => n.p !== people()[i])) buildSim();
+  const o = curOpt(), color = deptColors();
+  const onTeam = new Set(o ? o.team.filter(m => (o.marks[m.id] || "") !== "out").map(m => m.id) : []);
+  const { nodes, edges, W, H } = sim;
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.innerHTML = edges.map(([i, j]) => `<line class="edge" x1="${nodes[i].x}" y1="${nodes[i].y}" x2="${nodes[j].x}" y2="${nodes[j].y}"/>`).join("") +
+    nodes.map((n, i) => `<circle data-i="${i}" cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${color(n.p.department || "Other")}" class="${onTeam.has(n.p.id) ? "team" : onTeam.size ? "dim" : ""}"><title>${esc(n.p.name)}</title></circle>`).join("") +
+    nodes.filter(n => onTeam.has(n.p.id) || nodes.length <= 40).map(n => (n.x > W * 0.6 ? `<text x="${n.x - n.r - 3}" y="${n.y + 3}" text-anchor="end">` : `<text x="${n.x + n.r + 3}" y="${n.y + 3}">`) + `${esc(n.p.name)}</text>`).join("");
+  const depts = [...new Set(people().map(p => p.department || "Other"))].filter(d => color(d) !== OTHER);
+  $("legend").innerHTML = depts.map(d => `<span><i style="background:${color(d)}"></i>${esc(d)}</span>`).join("") + (people().some(p => color(p.department || "Other") === OTHER) ? `<span><i style="background:${OTHER}"></i>Other</span>` : "");
+  let drag = null;
+  svg.querySelectorAll("circle").forEach(c => {
+    c.onpointerdown = e => { drag = { n: nodes[+c.dataset.i], moved: false }; c.setPointerCapture(e.pointerId); };
+    c.onpointermove = e => { if (!drag) return; const pt = svg.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; const q = pt.matrixTransform(svg.getScreenCTM().inverse()); drag.n.x = q.x; drag.n.y = q.y; drag.n.fixed = true; drag.moved = true; for (let t = 0; t < 3; t++) step(.3); drawGraph(); };
+    c.onpointerup = () => { if (drag && !drag.moved) showProfile(drag.n.p.id); drag = null; };
+  });
+}
+
+/* ---------- wiring ---------- */
+function renderAll() {
+  $("rosterInfo").textContent = state.roster ? `${people().length} people from ${state.rosterName}` : "";
+  renderCalls(); renderTeam(); drawGraph();
+}
+$("addBtn").onclick = () => {
+  $("pasteMsg").textContent = "";
+  try {
+    const c = parseResult($("pasteBox").value);
+    state.calls.unshift(c); state.current = c.id; save(); $("pasteBox").value = ""; renderAll();
+  } catch (e) { $("pasteMsg").textContent = e.message.startsWith("Unexpected") || e.message.includes("JSON") ? "Couldn't read that. Make sure you copied the whole block, from the first { to the last }." : e.message; }
+};
+$("rosterFile").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { setRoster(await f.text(), f.name); sim = null; state.calls = state.calls.filter(c => !c.sample); state.current = state.calls[0]?.id || null; save(); renderAll(); }
+  catch (err) { alert("Couldn't read that roster. " + err.message); }
+  e.target.value = "";
+};
+$("exportBtn").onclick = () => {
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `team-finder-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(a.href);
+};
+$("importFile").onchange = async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { const s = JSON.parse(await f.text()); if (!Array.isArray(s.calls)) throw new Error("Not a Team Finder save file."); state = s; sim = null; save(); renderAll(); }
+  catch (err) { alert("Couldn't open that file. " + err.message); }
+  e.target.value = "";
+};
+$("helpBtn").onclick = () => $("help").showModal();
+addEventListener("resize", () => { sim = null; drawGraph(); });
+
+if (!state.roster) {
+  setRoster(SAMPLE_CSV, "the made-up sample roster");
+  if (SAMPLE_RESULT) { const c = parseResult(JSON.stringify(SAMPLE_RESULT)); c.sample = true; state.calls = [c]; state.current = c.id; }
+  save();
+}
+renderAll();
+</script>
+</body>
+</html>

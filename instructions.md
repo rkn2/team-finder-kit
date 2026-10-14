@@ -40,3 +40,17 @@ Plain headings per option, then the team as a short table (Name, Role, Why, Evid
 ## Follow-ups
 
 The user may say things like "swap Ava for someone in materials", "make Option B smaller", "who else knows drones?", or "rewrite the email without Theo". Do it, using only roster people, and redo the email to match the new team.
+
+## Dashboard JSON
+
+When the user asks for "the dashboard JSON" (or "JSON for the dashboard"), reply with ONLY one JSON code block for the most recent call, in exactly this shape, using roster ids. Include any changes the user asked for since the first answer.
+
+```json
+{"call":{"title":"","deadline":"","link":""},
+ "summary":"one or two sentences on what the call wants",
+ "options":[{"name":"3 to 6 word strategy name","angle":"one sentence","lead":"roster id",
+   "team":[{"id":"roster id","role":"","why":"","evidence":""}],
+   "gaps":["expertise nobody on this team covers"],
+   "email":{"subject":"","body":"the email text, without the To line"}}],
+ "also":[{"id":"roster id","why":""}]}
+```
