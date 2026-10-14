@@ -1,0 +1,15 @@
+SAMPLE FUNDING CALL (made up for testing)
+
+Title: Resilient Infrastructure Digital Twins
+Sponsor: A federal science agency (fictional)
+Deadline: March 15, 2027
+Award: up to $1.5M over 3 years
+
+Synopsis:
+This program supports interdisciplinary teams that build and test digital twins of
+civil infrastructure such as bridges, buildings, and water systems. Projects should
+combine real-time sensing, physics-based or AI models, and decision support for the
+people who operate the infrastructure. Strong proposals include a real testbed, a plan
+for handling uncertainty, and evidence that end users (city staff, facility managers,
+emergency managers) will trust and use the twin. Partnerships with industry or local
+government are encouraged.
